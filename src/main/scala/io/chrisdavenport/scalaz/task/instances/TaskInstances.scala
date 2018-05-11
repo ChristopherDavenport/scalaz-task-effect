@@ -3,6 +3,7 @@ package io.chrisdavenport.scalaz.task.instances
 import cats.effect.{Effect, IO}
 import scalaz.\/
 import scalaz.concurrent.Task
+import java.util.concurrent.atomic.AtomicBoolean
 
 object TaskInstances extends TaskInstances
 
@@ -18,11 +19,14 @@ trait TaskInstances {
   
     // Members declared in cats.effect.Async
     def async[A](k: (Either[Throwable,A] => Unit) => Unit): Task[A] = 
-      Task.async{ registered => k(e => registered(\/.fromEither(e)))}
+      Task.async{ registered =>
+        val a = new AtomicBoolean(true)
+        k(e => if (a.get) { a.set(false); registered(\/.fromEither(e))} else ())
+      }
   
     // Members declared in cats.effect.Effect
     def runAsync[A](fa: Task[A])(cb: Either[Throwable,A] => IO[Unit]): IO[Unit] = 
-      IO(fa.unsafePerformAsync{disjunction =>  cb(disjunction.toEither); ()}) // Suspicious Discard Here
+      IO(fa.unsafePerformAsync{disjunction =>  cb(disjunction.toEither).unsafeRunSync}) // Suspicious Discard Here
   
     // Members declared in cats.FlatMap
     def flatMap[A, B](fa: Task[A])(f: A => Task[B]): Task[B] = fa.flatMap(f)
