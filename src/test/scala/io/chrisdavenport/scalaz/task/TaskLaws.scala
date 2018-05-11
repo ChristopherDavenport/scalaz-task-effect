@@ -7,7 +7,7 @@ import org.typelevel.discipline.Laws
 import org.scalatest.prop.Checkers
 import org.scalatest.{ FunSuite, Matchers }
 import scala.util.control.NonFatal
-import io.chrisdavenport.scalaz.task.instances.TaskInstances._
+// import io.chrisdavenport.scalaz.task.instances.TaskInstances._ // Unnecessary because of Package Object
 import scalaz.concurrent.Task
 import TaskArbitrary._
 import TaskScalaCheckInstances._
