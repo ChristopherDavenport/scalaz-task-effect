@@ -52,7 +52,7 @@ class TaskLaws extends FunSuite with Matchers with Checkers with Discipline with
       }
   }
 
-  checkAllAsync("Task", implicit e => EffectTests[Task].effect[Int, Int, Int])
+  checkAllAsync("Effect[Task]", implicit e => EffectTests[Task].effect[Int, Int, Int])
 
 
 }

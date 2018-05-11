@@ -26,7 +26,7 @@ trait TaskInstances {
   
     // Members declared in cats.effect.Effect
     def runAsync[A](fa: Task[A])(cb: Either[Throwable,A] => IO[Unit]): IO[Unit] = 
-      IO(fa.unsafePerformAsync{disjunction =>  cb(disjunction.toEither).unsafeRunSync}) // Suspicious Discard Here
+      IO(fa.unsafePerformAsync{disjunction =>  cb(disjunction.toEither).unsafeRunSync})
   
     // Members declared in cats.FlatMap
     def flatMap[A, B](fa: Task[A])(f: A => Task[B]): Task[B] = fa.flatMap(f)
