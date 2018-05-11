@@ -18,12 +18,19 @@ libraryDependencies += "io.chrisdavenport" %% "scalaz-task-effect" % "<version>"
 
 ## Getting Started
 
-```tut
+Get some imports out of the way.
+
+```tut:silent
 import cats.implicits._
 import cats.effect._
-import io.chrisdavenport.scalaz.task._
-
 import scalaz.concurrent.Task
+```
+
+And then...
+
+```tut
+// This gets the instances
+import io.chrisdavenport.scalaz.task._
 
 val usingCatsSyntax = Task.delay(println("Hello There!")) *> Task.delay(println("Very Convincing"))
 usingCatsSyntax.unsafePerformSync
@@ -33,10 +40,19 @@ summonImplicits.unsafePerformSync
 
 val lifted = LiftIO[Task].liftIO(IO(println("I could have done arbitrary IO")))
 lifted.unsafePerformSync
+
+// A parametric function that you might find somewhere.
+// Without an effect instance for Task,
+// you couldn't use this function in a codebase operating in Task.
+def putStrLn[F[_]: Sync](str: String): F[Unit] = Sync[F].delay(println(str))
+
+// Using The Parametric Function
+putStrLn[Task]("Parametric String Output Here!").unsafePerformSync
+
 ```
 
 ## Instances
 
 ### Task
 
-- Effect
+- [`Effect`](https://typelevel.org/cats-effect/typeclasses/effect.html)
