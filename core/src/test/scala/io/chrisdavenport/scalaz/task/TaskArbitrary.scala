@@ -7,7 +7,7 @@ import scalaz.concurrent.Task
 object TaskArbitrary {
   implicit def catsEffectLawsArbitraryForTask[A: Arbitrary: Cogen]: Arbitrary[Task[A]] =
     Arbitrary(Gen.delay(genTask[A]))
-    
+
   def genTask[A: Arbitrary: Cogen]: Gen[Task[A]] = {
     Gen.frequency(
       5 -> genPure[A],
@@ -26,23 +26,27 @@ object TaskArbitrary {
 
   def genApply[A: Arbitrary]: Gen[Task[A]] =
     Arbitrary.arbitrary[A].map(Task.apply(_))
-  
+
   def genFail[A]: Gen[Task[A]] =
     Arbitrary.arbitrary[Throwable].map(Task.fail)
 
-  def genAsync[A: Arbitrary]: Gen[Task[A]] = 
-    Arbitrary.arbitrary[(Either[Throwable, A] => Unit) => Unit].map(f => 
-      Task.async{ registered => f(e => registered(\/.fromEither(e)))}
-    )
+  def genAsync[A: Arbitrary]: Gen[Task[A]] =
+    Arbitrary
+      .arbitrary[(Either[Throwable, A] => Unit) => Unit]
+      .map(f =>
+        Task.async { registered =>
+          f(e => registered(\/.fromEither(e)))
+      })
 
   def genNestedAsync[A: Arbitrary: Cogen]: Gen[Task[A]] =
-    Arbitrary.arbitrary[(Either[Throwable, Task[A]] => Unit) => Unit]
-      .map(f => 
-        Task.async{ registered:((Throwable \/ Task[A]) => Unit) => 
-          f(e => registered(\/.fromEither(e)))
-        }
-        .flatMap(x => x)
-      )
+    Arbitrary
+      .arbitrary[(Either[Throwable, Task[A]] => Unit) => Unit]
+      .map(f =>
+        Task
+          .async { registered: ((Throwable \/ Task[A]) => Unit) =>
+            f(e => registered(\/.fromEither(e)))
+          }
+          .flatMap(x => x))
 
   def genBindSuspend[A: Arbitrary: Cogen]: Gen[Task[A]] =
     Arbitrary.arbitrary[A].map(Task.apply(_).flatMap(Task.now))
