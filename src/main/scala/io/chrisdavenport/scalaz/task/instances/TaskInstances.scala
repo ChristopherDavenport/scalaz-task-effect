@@ -1,6 +1,7 @@
 package io.chrisdavenport.scalaz.task.instances
 
 import cats.effect.{Effect, IO}
+import cats.syntax.functor._
 import scalaz.\/
 import scalaz.concurrent.Task
 import java.util.concurrent.atomic.AtomicBoolean
@@ -26,7 +27,20 @@ trait TaskInstances {
   
     // Members declared in cats.effect.Effect
     def runAsync[A](fa: Task[A])(cb: Either[Throwable,A] => IO[Unit]): IO[Unit] = 
-      IO(fa.unsafePerformAsync{disjunction =>  cb(disjunction.toEither).unsafeRunSync})
+      IO(
+        fa.unsafePerformAsync{disjunction =>  
+          cb(disjunction.toEither)
+          .attempt
+          .flatMap{ e => 
+            IO.async{f : (Either[Throwable, Unit] => Unit) => 
+              f(e)
+            }
+          }
+          .attempt
+          .void
+          .unsafeRunSync
+        }
+      )
   
     // Members declared in cats.FlatMap
     def flatMap[A, B](fa: Task[A])(f: A => Task[B]): Task[B] = fa.flatMap(f)
