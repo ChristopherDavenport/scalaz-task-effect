@@ -14,36 +14,48 @@ to play nicely together with minimal hardships.</p>
 
 <h2 id="getting-started">Getting Started</h2>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">scala</span><span class="o">&gt;</span> <span class="k">import</span> <span class="nn">cats.implicits._</span>
-<span class="k">import</span> <span class="nn">cats.implicits._</span>
+<p>Get some imports out of the way.</p>
 
-<span class="n">scala</span><span class="o">&gt;</span> <span class="k">import</span> <span class="nn">cats.effect._</span>
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.implicits._</span>
 <span class="k">import</span> <span class="nn">cats.effect._</span>
+<span class="k">import</span> <span class="nn">scalaz.concurrent.Task</span>
+</code></pre>
+</div>
 
-<span class="n">scala</span><span class="o">&gt;</span> <span class="k">import</span> <span class="nn">io.chrisdavenport.scalaz.task._</span>
+<p>And then…</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">scala</span><span class="o">&gt;</span> <span class="c1">// This gets the instances
+</span>     <span class="o">|</span> <span class="k">import</span> <span class="nn">io.chrisdavenport.scalaz.task._</span>
 <span class="k">import</span> <span class="nn">io.chrisdavenport.scalaz.task._</span>
 
-<span class="n">scala</span><span class="o">&gt;</span> <span class="k">import</span> <span class="nn">scalaz.concurrent.Task</span>
-<span class="k">import</span> <span class="nn">scalaz.concurrent.Task</span>
-
 <span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">usingCatsSyntax</span> <span class="k">=</span> <span class="nc">Task</span><span class="o">.</span><span class="n">delay</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="s">"Hello There!"</span><span class="o">))</span> <span class="o">*&gt;</span> <span class="nc">Task</span><span class="o">.</span><span class="n">delay</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="s">"Very Convincing"</span><span class="o">))</span>
-<span class="n">usingCatsSyntax</span><span class="k">:</span> <span class="kt">scalaz.concurrent.Task</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="n">scalaz</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Task</span><span class="k">@</span><span class="mi">1</span><span class="n">edd18a</span>
+<span class="n">usingCatsSyntax</span><span class="k">:</span> <span class="kt">scalaz.concurrent.Task</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="n">scalaz</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Task</span><span class="k">@</span><span class="mi">66613</span><span class="n">a2c</span>
 
 <span class="n">scala</span><span class="o">&gt;</span> <span class="n">usingCatsSyntax</span><span class="o">.</span><span class="n">unsafePerformSync</span>
 <span class="nc">Hello</span> <span class="nc">There</span><span class="o">!</span>
 <span class="nc">Very</span> <span class="nc">Convincing</span>
 
 <span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">summonImplicits</span> <span class="k">=</span> <span class="nc">Sync</span><span class="o">[</span><span class="kt">Task</span><span class="o">].</span><span class="n">delay</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="s">"I came out to play!"</span><span class="o">))</span>
-<span class="n">summonImplicits</span><span class="k">:</span> <span class="kt">scalaz.concurrent.Task</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="n">scalaz</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Task</span><span class="k">@</span><span class="mi">6</span><span class="n">ad88738</span>
+<span class="n">summonImplicits</span><span class="k">:</span> <span class="kt">scalaz.concurrent.Task</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="n">scalaz</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Task</span><span class="k">@</span><span class="mi">680707</span><span class="n">b8</span>
 
 <span class="n">scala</span><span class="o">&gt;</span> <span class="n">summonImplicits</span><span class="o">.</span><span class="n">unsafePerformSync</span>
 <span class="n">I</span> <span class="n">came</span> <span class="n">out</span> <span class="n">to</span> <span class="n">play</span><span class="o">!</span>
 
 <span class="n">scala</span><span class="o">&gt;</span> <span class="k">val</span> <span class="n">lifted</span> <span class="k">=</span> <span class="nc">LiftIO</span><span class="o">[</span><span class="kt">Task</span><span class="o">].</span><span class="n">liftIO</span><span class="o">(</span><span class="nc">IO</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="s">"I could have done arbitrary IO"</span><span class="o">)))</span>
-<span class="n">lifted</span><span class="k">:</span> <span class="kt">scalaz.concurrent.Task</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="n">scalaz</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Task</span><span class="k">@</span><span class="mi">6107194</span><span class="n">e</span>
+<span class="n">lifted</span><span class="k">:</span> <span class="kt">scalaz.concurrent.Task</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="n">scalaz</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">Task</span><span class="k">@</span><span class="mi">2</span><span class="n">b3cb9c0</span>
 
 <span class="n">scala</span><span class="o">&gt;</span> <span class="n">lifted</span><span class="o">.</span><span class="n">unsafePerformSync</span>
 <span class="n">I</span> <span class="n">could</span> <span class="n">have</span> <span class="n">done</span> <span class="n">arbitrary</span> <span class="nc">IO</span>
+
+<span class="n">scala</span><span class="o">&gt;</span> <span class="c1">// A parametric function that you might find somewhere.
+</span>     <span class="o">|</span> <span class="c1">// Without an effect instance for Task,
+</span>     <span class="o">|</span> <span class="c1">// you couldn't use this function in a codebase operating in Task.
+</span>     <span class="o">|</span> <span class="k">def</span> <span class="n">putStrLn</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">Sync</span><span class="o">](</span><span class="n">str</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Sync</span><span class="o">[</span><span class="kt">F</span><span class="o">].</span><span class="n">delay</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="n">str</span><span class="o">))</span>
+<span class="n">putStrLn</span><span class="k">:</span> <span class="err">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="err">]</span><span class="o">(</span><span class="n">str</span><span class="k">:</span> <span class="kt">String</span><span class="o">)(</span><span class="k">implicit</span> <span class="n">evidence$1</span><span class="k">:</span> <span class="kt">cats.effect.Sync</span><span class="o">[</span><span class="kt">F</span><span class="o">])</span><span class="n">F</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span>
+
+<span class="n">scala</span><span class="o">&gt;</span> <span class="c1">// Using The Parametric Function
+</span>     <span class="o">|</span> <span class="n">putStrLn</span><span class="o">[</span><span class="kt">Task</span><span class="o">](</span><span class="s">"Parametric String Output Here!"</span><span class="o">).</span><span class="n">unsafePerformSync</span>
+<span class="nc">Parametric</span> <span class="nc">String</span> <span class="nc">Output</span> <span class="nc">Here</span><span class="o">!</span>
 </code></pre>
 </div>
 
@@ -52,7 +64,7 @@ to play nicely together with minimal hardships.</p>
 <h3 id="task">Task</h3>
 
 <ul>
-  <li>Effect</li>
+  <li><a href="https://typelevel.org/cats-effect/typeclasses/effect.html"><code class="highlighter-rouge">Effect</code></a></li>
 </ul>
 </div></div></section><section class="technologies"><div class="container"><div class="row"></div></div></section></main><footer id="site-footer"><div class="container"><div class="row"><div class="col-xs-6"><p>scalaz-task-effect is designed and developed by <a href="" target="_blank">Christopher Davenport</a></p></div><div class="col-xs-6"><p class="text-right"><a href="https://github.com/ChristopherDavenport/scalaz-task-effect"><span class="fa fa-github"></span>View on GitHub</a></p></div></div></div></footer><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/scalaz-task-effect/highlight/highlight.pack.js"></script><script>hljs.configure({
 languages:['scala','java','bash']
