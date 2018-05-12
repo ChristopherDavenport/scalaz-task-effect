@@ -20,10 +20,13 @@ trait TaskInstances {
     def raiseError[A](e: Throwable): Task[A] = Task.fail(e)
 
     // Members declared in cats.effect.Async
+    // In order to comply with `repeatedCallbackIgnored` law
+    // on async, a custom AtomicBoolean is required to ignore
+    // second callbacks.
     def async[A](k: (Either[Throwable, A] => Unit) => Unit): Task[A] =
       Task.async { registered =>
         val a = new AtomicBoolean(true)
-        k(e => if (a.get) { a.set(false); registered(\/.fromEither(e)) } else ())
+        k(e => if (a.getAndSet(false)) { registered(\/.fromEither(e)) } else ())
       }
 
     // Members declared in cats.effect.Effect
