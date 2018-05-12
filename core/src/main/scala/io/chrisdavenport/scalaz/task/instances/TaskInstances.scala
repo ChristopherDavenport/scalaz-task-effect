@@ -1,7 +1,6 @@
 package io.chrisdavenport.scalaz.task.instances
 
 import cats.effect.{Effect, IO}
-import cats.syntax.functor._
 import scalaz.\/
 import scalaz.concurrent.Task
 import java.util.concurrent.atomic.AtomicBoolean
@@ -30,18 +29,19 @@ trait TaskInstances {
       }
 
     // Members declared in cats.effect.Effect
+    
+    /** runAsync takes the final callback to something that
+      * summarizes the effects in an IO[Unit] as such this
+      * takes the Task and executes the internal IO callback
+      * into the task asynchronous execution all delayed
+      * within the outer IO, discarding any error that might
+      * occur
+      **/
     def runAsync[A](fa: Task[A])(cb: Either[Throwable, A] => IO[Unit]): IO[Unit] =
       IO(
         fa.unsafePerformAsync { disjunction =>
-          cb(disjunction.toEither).attempt
-            .flatMap { e =>
-              IO.async { f: (Either[Throwable, Unit] => Unit) =>
-                f(e)
-              }
-            }
-            .attempt
-            .void
-            .unsafeRunSync
+          cb(disjunction.toEither)
+          .unsafeRunAsync(_ => ())
         }
       )
 
