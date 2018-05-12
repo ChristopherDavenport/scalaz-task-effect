@@ -29,19 +29,19 @@ trait TaskInstances {
       }
 
     // Members declared in cats.effect.Effect
-    
+
     /** runAsync takes the final callback to something that
-      * summarizes the effects in an IO[Unit] as such this
-      * takes the Task and executes the internal IO callback
-      * into the task asynchronous execution all delayed
-      * within the outer IO, discarding any error that might
-      * occur
+     * summarizes the effects in an IO[Unit] as such this
+     * takes the Task and executes the internal IO callback
+     * into the task asynchronous execution all delayed
+     * within the outer IO, discarding any error that might
+     * occur
       **/
     def runAsync[A](fa: Task[A])(cb: Either[Throwable, A] => IO[Unit]): IO[Unit] =
       IO(
         fa.unsafePerformAsync { disjunction =>
           cb(disjunction.toEither)
-          .unsafeRunAsync(_ => ())
+            .unsafeRunAsync(_ => ())
         }
       )
 
