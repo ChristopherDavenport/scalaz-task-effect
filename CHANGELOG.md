@@ -4,6 +4,13 @@ This file summarizes **notable** changes for each release, but does not describe
 
 ----
 
+## <a name="0.1.0"></a>New and Noteworthy for Version 0.1.0
+
+Instantiates MiMa so this can be depended on without concern, and hopefully we can iterate with stability.
+
+- Put MiMa in place to ensure binary compatibility [#16](https://github.com/ChristopherDavenport/scalaz-task-effect/pull/16)
+- Make sure License is in repository, not only mentioned in `build.sbt` [#14](https://github.com/ChristopherDavenport/scalaz-task-effect/pull/14)
+
 ## <a name="0.0.2"></a>New and Noteworthy for Version 0.0.2
 
 Addresses Minor Performance and Race Conditions.
