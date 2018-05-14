@@ -3,7 +3,7 @@ lazy val root = project.in(file("."))
   .settings(noPublishSettings, commonSettings, releaseSettings)
 
 lazy val core = project.in(file("core"))
-    .settings(commonSettings, releaseSettings)
+    .settings(commonSettings, releaseSettings, mimaSettings)
     .settings(
       name := "scalaz-task-effect"
     )
@@ -49,6 +49,7 @@ lazy val releaseSettings = {
       inquireVersions,
       runClean,
       runTest,
+      releaseStepCommandAndRemaining("+mimaReportBinaryIssues"),
       setReleaseVersion,
       commitReleaseVersion,
       tagRelease,
