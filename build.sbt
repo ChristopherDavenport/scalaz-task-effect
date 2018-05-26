@@ -17,7 +17,12 @@ lazy val docs = project.in(file("docs"))
 
 val catsV = "1.1.0"
 val catsEffectV = "0.10.1"
-val scalazV = "7.2.22"
+val scalazV = "7.2.23"
+
+// check for library updates whenever the project is [re]load
+onLoad in Global := { s =>
+  "dependencyUpdates" :: s
+}
 
 lazy val contributors = Seq(
   "ChristopherDavenport" -> "Christopher Davenport"
@@ -29,7 +34,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.6",
   crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
 
-  addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.6" cross CrossVersion.binary),
+  addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.7" cross CrossVersion.binary),
 
   libraryDependencies ++= Seq(
     "org.scalaz"                  %% "scalaz-concurrent"          % scalazV,
