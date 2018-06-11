@@ -1,6 +1,7 @@
 package io.chrisdavenport.scalaz.task
 
-import cats.effect.laws.discipline.EffectTests
+import cats.effect.laws.discipline.{EffectTests, Parameters}
+import cats.effect.laws.discipline.arbitrary._
 import org.typelevel.discipline.scalatest.Discipline
 import cats.effect.laws.util.TestContext
 import org.typelevel.discipline.Laws
@@ -52,6 +53,10 @@ class TaskLaws extends FunSuite with Matchers with Checkers with Discipline with
       }
   }
 
-  checkAllAsync("Effect[Task]", implicit e => EffectTests[Task].effect[Int, Int, Int])
+  implicit val taskParams: Parameters =
+    Parameters(
+      allowNonTerminationLaws = false,
+      stackSafeIterationsCount = 10000)
 
+  checkAllAsync("Task", implicit ec => EffectTests[Task].effect[Int, Int, Int])
 }
