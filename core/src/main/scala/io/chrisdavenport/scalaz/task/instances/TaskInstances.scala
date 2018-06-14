@@ -49,8 +49,7 @@ trait TaskInstances {
     def runAsync[A](fa: Task[A])(cb: Either[Throwable, A] => IO[Unit]): IO[Unit] =
       IO(
         fa.unsafePerformAsync { disjunction =>
-          cb(disjunction.toEither)
-            .unsafeRunAsync(_ => ())
+          cb(disjunction.toEither).unsafeRunAsync(_ => ())
         }
       )
 
@@ -63,8 +62,8 @@ trait TaskInstances {
         }
       })
 
-    override def toIO[A](fa: Task[A]): IO[A] =
-      IO.async(cb => fa.unsafePerformAsync(d => cb(d.toEither)))
+    override def toIO[A](fa: Task[A]): IO[A] = 
+      IO.async(cb => this.runAsync(fa)(r => IO(cb(r))).unsafeRunSync)
 
     // Members declared in cats.FlatMap
     def flatMap[A, B](fa: Task[A])(f: A => Task[B]): Task[B] = fa.flatMap(f)
