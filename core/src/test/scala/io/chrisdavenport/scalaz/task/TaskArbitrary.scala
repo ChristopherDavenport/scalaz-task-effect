@@ -11,10 +11,10 @@ object TaskArbitrary {
   def genTask[A: Arbitrary: Cogen]: Gen[Task[A]] = {
     Gen.frequency(
       5 -> genPure[A],
-      5 -> genApply[A],
       1 -> genFail[A],
       5 -> genAsync[A],
       5 -> genNestedAsync[A],
+      5 -> genSuspend[A],
       5 -> getMapOne[A],
       5 -> getMapTwo[A],
       10 -> genFlatMap[A]
@@ -22,10 +22,7 @@ object TaskArbitrary {
   }
 
   def genPure[A: Arbitrary]: Gen[Task[A]] =
-    Arbitrary.arbitrary[A].map(Task.now(_))
-
-  def genApply[A: Arbitrary]: Gen[Task[A]] =
-    Arbitrary.arbitrary[A].map(Task.apply(_))
+    Arbitrary.arbitrary[A].map(Task.now)
 
   def genFail[A]: Gen[Task[A]] =
     Arbitrary.arbitrary[Throwable].map(Task.fail)
@@ -48,8 +45,8 @@ object TaskArbitrary {
           }
           .flatMap(x => x))
 
-  def genBindSuspend[A: Arbitrary: Cogen]: Gen[Task[A]] =
-    Arbitrary.arbitrary[A].map(Task.apply(_).flatMap(Task.now))
+  def genSuspend[A: Arbitrary: Cogen]: Gen[Task[A]] =
+    Arbitrary.arbitrary[Task[A]].map(Task.suspend(_))
 
   def genFlatMap[A: Arbitrary: Cogen]: Gen[Task[A]] =
     for {

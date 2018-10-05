@@ -1,19 +1,20 @@
 package io.chrisdavenport.scalaz.task
 
-import cats.effect.laws.discipline.EffectTests
-import org.typelevel.discipline.scalatest.Discipline
-import cats.effect.laws.util.TestContext
-import org.typelevel.discipline.Laws
+import cats.effect.laws.discipline.arbitrary._
+import cats.effect.laws.discipline.{EffectTests, Parameters}
+import cats.effect.laws.util.{TestContext, TestInstances}
+import cats.implicits._
+import io.chrisdavenport.scalaz.task.TaskArbitrary._
+import io.chrisdavenport.scalaz.task.TaskScalaCheckInstances._
 import org.scalatest.prop.Checkers
 import org.scalatest.{FunSuite, Matchers}
-import scala.util.control.NonFatal
-// import io.chrisdavenport.scalaz.task.instances.TaskInstances._ // Unnecessary because of Package Object
+import org.typelevel.discipline.Laws
+import org.typelevel.discipline.scalatest.Discipline
 import scalaz.concurrent.Task
-import TaskArbitrary._
-import TaskScalaCheckInstances._
+
 import java.io.{ByteArrayOutputStream, PrintStream}
-import cats.implicits._
-import cats.effect.laws.util.TestInstances
+
+import scala.util.control.NonFatal
 
 class TaskLaws extends FunSuite with Matchers with Checkers with Discipline with TestInstances {
 
@@ -52,6 +53,7 @@ class TaskLaws extends FunSuite with Matchers with Checkers with Discipline with
       }
   }
 
+  implicit val params: Parameters = Parameters.default.copy(allowNonTerminationLaws = false)
   checkAllAsync("Effect[Task]", implicit e => EffectTests[Task].effect[Int, Int, Int])
 
 }
