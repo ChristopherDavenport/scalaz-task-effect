@@ -16,7 +16,7 @@ lazy val docs = project.in(file("docs"))
   .dependsOn(core)
 
 val catsV = "1.5.0"
-val catsEffectV = "1.0.0"
+val catsEffectV = "1.1.0"
 val scalazV = "7.2.26"
 
 // check for library updates whenever the project is [re]load
