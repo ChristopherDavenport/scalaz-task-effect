@@ -1,12 +1,17 @@
 package io.chrisdavenport.scalaz.task
 
 import org.scalacheck._
-import scalaz.\/
 import scalaz.concurrent.Task
+import scalaz.concurrent.Task.ParallelTask
+import scalaz.{\/, Tag}
 
 object TaskArbitrary {
   implicit def catsEffectLawsArbitraryForTask[A: Arbitrary: Cogen]: Arbitrary[Task[A]] =
     Arbitrary(Gen.delay(genTask[A]))
+
+  implicit def catsEffectLawsArbitraryForParallelTask[
+      A: Arbitrary: Cogen
+  ]: Arbitrary[ParallelTask[A]] = Tag.subst(catsEffectLawsArbitraryForTask[A])
 
   def genTask[A: Arbitrary: Cogen]: Gen[Task[A]] = {
     Gen.frequency(
@@ -15,8 +20,8 @@ object TaskArbitrary {
       5 -> genAsync[A],
       5 -> genNestedAsync[A],
       5 -> genSuspend[A],
-      5 -> getMapOne[A],
-      5 -> getMapTwo[A],
+      5 -> genMapOne[A],
+      5 -> genMapTwo[A],
       10 -> genFlatMap[A]
     )
   }
@@ -54,13 +59,13 @@ object TaskArbitrary {
       f <- Arbitrary.arbitrary[A => Task[A]]
     } yield ioa.flatMap(f)
 
-  def getMapOne[A: Arbitrary: Cogen]: Gen[Task[A]] =
+  def genMapOne[A: Arbitrary: Cogen]: Gen[Task[A]] =
     for {
       ioa <- Arbitrary.arbitrary[Task[A]]
       f <- Arbitrary.arbitrary[A => A]
     } yield ioa.map(f)
 
-  def getMapTwo[A: Arbitrary: Cogen]: Gen[Task[A]] =
+  def genMapTwo[A: Arbitrary: Cogen]: Gen[Task[A]] =
     for {
       ioa <- Arbitrary.arbitrary[Task[A]]
       f1 <- Arbitrary.arbitrary[A => A]

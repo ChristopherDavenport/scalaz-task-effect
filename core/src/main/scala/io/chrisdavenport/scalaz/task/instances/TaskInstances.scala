@@ -1,8 +1,10 @@
 package io.chrisdavenport.scalaz.task.instances
 
-import cats.effect.{Effect, ExitCase, IO, SyncIO}
+import cats._
+import cats.effect._
 import scalaz.concurrent.Task
-import scalaz.{-\/, \/, \/-}
+import scalaz.concurrent.Task.ParallelTask
+import scalaz.{-\/, \/, \/-, Tag}
 
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -73,5 +75,23 @@ trait TaskInstances {
       val fence = new AtomicBoolean(true)
       k(e => if (fence.getAndSet(false)) { registered(\/.fromEither(e)) })
     }
+  }
+
+  protected val parallelTaskApplicative: Applicative[ParallelTask] = new Applicative[ParallelTask] {
+    def pure[A](x: A): ParallelTask[A] =
+      Task.taskParallelApplicativeInstance.pure(x)
+
+    def ap[A, B](ff: ParallelTask[A => B])(fa: ParallelTask[A]): ParallelTask[B] =
+      Task.taskParallelApplicativeInstance.ap(fa)(ff)
+
+    override def map[A, B](fa: ParallelTask[A])(f: A => B): ParallelTask[B] =
+      Task.taskParallelApplicativeInstance.map(fa)(f)
+  }
+
+  implicit val taskParallel: Parallel[Task, ParallelTask] = new Parallel[Task, ParallelTask] {
+    val monad: Monad[Task] = taskEffect
+    val applicative: Applicative[ParallelTask] = parallelTaskApplicative
+    val sequential: ParallelTask ~> Task = λ[ParallelTask ~> Task](Tag.unwrap(_))
+    val parallel: Task ~> ParallelTask = λ[Task ~> ParallelTask](Tag(_))
   }
 }
