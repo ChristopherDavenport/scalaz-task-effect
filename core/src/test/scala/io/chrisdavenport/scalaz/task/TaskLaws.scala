@@ -1,22 +1,33 @@
 package io.chrisdavenport.scalaz.task
 
+import cats.Applicative
+import cats.effect.laws.discipline.EffectTests
 import cats.effect.laws.discipline.arbitrary._
-import cats.effect.laws.discipline.{EffectTests, Parameters}
-import cats.effect.laws.util.{TestContext, TestInstances}
+import cats.effect.laws.util.TestContext
 import cats.implicits._
+import cats.laws.discipline.{ApplicativeTests, ParallelTests}
 import io.chrisdavenport.scalaz.task.TaskArbitrary._
-import io.chrisdavenport.scalaz.task.TaskScalaCheckInstances._
+import io.chrisdavenport.scalaz.task.instances.TaskInstances
 import org.scalatest.prop.Checkers
 import org.scalatest.{FunSuite, Matchers}
 import org.typelevel.discipline.Laws
 import org.typelevel.discipline.scalatest.Discipline
 import scalaz.concurrent.Task
+import scalaz.concurrent.Task.ParallelTask
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
 import scala.util.control.NonFatal
 
-class TaskLaws extends FunSuite with Matchers with Checkers with Discipline with TestInstances {
+class TaskLaws
+    extends FunSuite
+    with Matchers
+    with Checkers
+    with Discipline
+    with TaskInstances
+    with TaskTestInstances {
+
+  implicit val parallelTaskAp: Applicative[ParallelTask] = parallelTaskApplicative
 
   /**
    * Silences `System.err`, only printing the output in case exceptions are
@@ -53,7 +64,21 @@ class TaskLaws extends FunSuite with Matchers with Checkers with Discipline with
       }
   }
 
-  implicit val params: Parameters = Parameters.default.copy(allowNonTerminationLaws = false)
-  checkAllAsync("Effect[Task]", implicit e => EffectTests[Task].effect[Int, Int, Int])
+  checkAllAsync(
+    "Effect[Task]",
+    implicit ec => EffectTests[Task].effect[Int, Int, Int]
+  )
 
+  checkAllAsync(
+    "Applicative[ParallelTask]",
+    implicit ec => {
+      val tests = ApplicativeTests[ParallelTask]
+      tests.applicative[Int, Int, Int]
+    }
+  )
+
+  checkAllAsync(
+    "Parallel[Task, ParallelTask]",
+    implicit ec => ParallelTests[Task, ParallelTask].parallel[Int, Int]
+  )
 }
