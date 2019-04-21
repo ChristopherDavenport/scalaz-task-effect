@@ -8,6 +8,8 @@ import scalaz.{-\/, \/, \/-, Tag}
 
 import java.util.concurrent.atomic.AtomicBoolean
 
+import scala.util.control.NonFatal
+
 object TaskInstances extends TaskInstances
 
 trait TaskInstances {
@@ -38,10 +40,14 @@ trait TaskInstances {
     // on async, a custom AtomicBoolean is required to ignore
     // second callbacks.
     def async[A](k: (Either[Throwable, A] => Unit) => Unit): Task[A] =
-      Task.async(registerCallback(k))
+      Task.async { cb =>
+        val fence = new AtomicBoolean(true)
+        try k(e => if (fence.getAndSet(false)) cb(\/.fromEither(e)) else ())
+        catch { case NonFatal(t) => cb(-\/(t)) }
+      }
 
     def asyncF[A](k: (Either[Throwable, A] => Unit) => Task[Unit]): Task[A] =
-      Task.async(registerCallback(k)(_).unsafePerformAsync(_ => ()))
+      async(k.andThen(_.unsafePerformAsync(_ => ())))
 
     // Members declared in cats.effect.Effect
 
@@ -67,13 +73,6 @@ trait TaskInstances {
         case -\/(e) => release(a, ExitCase.error(e)).flatMap(_ => Task.fail(e))
         case \/-(b) => release(a, ExitCase.complete).map(_ => b)
       }
-    }
-
-    private def registerCallback[A, B](k: (Either[Throwable, A] => Unit) => B)(
-        registered: Throwable \/ A => Unit
-    ): B = {
-      val fence = new AtomicBoolean(true)
-      k(e => if (fence.getAndSet(false)) { registered(\/.fromEither(e)) })
     }
   }
 

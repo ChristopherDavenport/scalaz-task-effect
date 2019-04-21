@@ -1,11 +1,12 @@
 package io.chrisdavenport.scalaz.task
 
-import cats.Applicative
+import cats.effect.Async
 import cats.effect.laws.discipline.EffectTests
 import cats.effect.laws.discipline.arbitrary._
 import cats.effect.laws.util.TestContext
 import cats.implicits._
 import cats.laws.discipline.{ApplicativeTests, ParallelTests}
+import cats.{Applicative, Eq}
 import io.chrisdavenport.scalaz.task.TaskArbitrary._
 import io.chrisdavenport.scalaz.task.instances.TaskInstances
 import org.scalatest.prop.Checkers
@@ -16,7 +17,9 @@ import scalaz.concurrent.Task
 import scalaz.concurrent.Task.ParallelTask
 
 import java.io.{ByteArrayOutputStream, PrintStream}
+import java.util.concurrent.RejectedExecutionException
 
+import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 
 class TaskLaws
@@ -81,4 +84,15 @@ class TaskLaws
     "Parallel[Task, ParallelTask]",
     implicit ec => ParallelTests[Task, ParallelTask].parallel[Int, Int]
   )
+
+  test("Async.shift[Task] on rejecting execution context") {
+    implicit val context: TestContext = TestContext()
+    val boom = new RejectedExecutionException("Boom")
+    val rejectingEc = new ExecutionContext {
+      def execute(runnable: Runnable): Unit = throw boom
+      def reportFailure(cause: Throwable): Unit = ()
+    }
+
+    assert(Eq[Task[Unit]].eqv(Async.shift[Task](rejectingEc), Task.fail(boom)))
+  }
 }
